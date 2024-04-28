@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// TODO: add leter maybe some ENUM
+// TODO: add later user preferences model
+
+model User {
+  id String @id @default(cuid())
+
+  name     String
+  email    String  @unique
+  password String
+  logo     String?
+  phone    String? @unique
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  subscriptions    Subscription[]
+  requestedSerices RequestedService[]
+
+  @@map("user")
+}
+
+model Subscription {
+  id String @id @default(cuid())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId String  @map("service_id")
+
+  price Float
+  note  String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("subscription")
+}
+
+model Service {
+  id String @id @default(cuid())
+
+  name  String
+  price Float
+  url   String
+  logo  String
+
+  subscriptions Subscription[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("service")
+}
+
+model RequestedService {
+  id String @id @default(cuid())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+
+  name String
+  url  String
+
+  pending  Boolean @default(false)
+  accepted Boolean @default(false)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("requested_service")
+}
