@@ -15,20 +15,8 @@ export class UserService {
 			},
 			include: {
 				subscriptions: {
-					select: {
-						id: true,
-						price: true,
-						note: true,
-						createdAt: true,
-						service: {
-							select: {
-								id: true,
-								name: true,
-								logo: true,
-								price: true,
-								url: true,
-							}
-						}
+					include: {
+						service: true,
 					}
 				},
 				requestedSerices: true,

@@ -1,0 +1,177 @@
+"use client"
+
+import { APP_PAGES } from '@/config/pages-url.config';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Button } from 'flowbite-react';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import Link from 'next/link';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import * as yup from 'yup';
+
+type RegisterFormInputs = {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  repeatPassword: string;
+};
+
+const schema = yup.object().shape({
+  name: yup
+    .string()
+    .min(2, "Your name must be realistic, so it must be longer than 2 symbols")
+    .max(255, "Your name must be realistic, so it must be shorter than 255 symbols")
+    .required("Please provide your name"),
+  email: yup
+    .string()
+    .email("Please provide a valid email address")
+    .required("Please provide your email address"),
+  phone: yup
+    .string()
+    .required("Please provide your phone number")
+    .test('is-valid-phone-number', 'Please provide a valid phone number with country code', (value) => {
+      const phone = parsePhoneNumberFromString(value || '');
+      return phone ? phone.isValid() : false;
+    }),
+  password: yup
+    .string()
+    .min(8, "Password must be longer that 8 characters")
+    .required("Password must be provided"),
+  repeatPassword: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Passwords must match'),
+});
+
+export default function Register() {
+  const { handleSubmit, control, formState: { errors } } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      password: '',
+      repeatPassword: '',
+    },
+  });
+
+  const onSubmit = (data: RegisterFormInputs) => {
+    toast.success('Successfully created new account!', {
+      position: 'top-right',
+      duration: 5000,
+    })
+    console.log("Registration data: ", data);
+  };
+
+  return (
+    <section>
+      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+
+        <div className="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
+          <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+            <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-700 md:text-2xl">
+              Create an new account
+            </h1>
+            <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit(onSubmit)}>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Your name</label>
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="text"
+                      name="name"
+                      maxLength={255}
+                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      placeholder="Enter your name"
+                    />
+
+
+                  )}
+                />
+                {errors.name && <p className="text-sm text-red-600 mt-2">{errors.name.message}</p>}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Your email</label>
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="email"
+                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      placeholder="Enter your email"
+                    />
+                  )}
+                />
+                {errors.email && <p className="text-sm text-red-600 mt-2">{errors.email.message}</p>}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Your phone number</label>
+                <Controller
+                  name="phone"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="text"
+                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      placeholder="Enter your phone number"
+                    />
+                  )}
+                />
+                {errors.phone && <p className="text-sm text-red-600 mt-2">{errors.phone.message}</p>}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Your password</label>
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="password"
+                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      placeholder="Enter your password"
+                    />
+                  )}
+                />
+                {errors.password && <p className="text-sm text-red-600 mt-2">{errors.password.message}</p>}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">Confirm password</label>
+                <Controller
+                  name="repeatPassword"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="password"
+                      placeholder="Confirm password"
+                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                    />
+                  )}
+                />
+                {errors.repeatPassword && <p className="text-sm text-red-600 mt-2">{errors.repeatPassword.message}</p>}
+              </div>
+
+              <Button type="submit" className="w-full">Create an account</Button>
+
+              <p className="text-sm font-light text-gray-500">
+                Already have an account?  <Link href={APP_PAGES.LOGIN} className="font-medium text-primary-600 hover:underline">Login here</Link>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
