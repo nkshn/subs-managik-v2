@@ -6,7 +6,7 @@ export class ServiceService {
 	constructor(private prisma: PrismaService) {}
 
 	async getAll() {
-		const services = await this.prisma.service.findMany({
+		return this.prisma.service.findMany({
 			select: {
 				id: true,
 				fullName: true,
@@ -14,7 +14,5 @@ export class ServiceService {
 				backgroundColor: true,
 			}
 		})
-
-		return { services }
 	}
 }

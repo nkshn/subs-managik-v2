@@ -7,17 +7,7 @@ import { Subscription, SubscriptionFormInputs } from "@/types/subscription.types
 import Link from "next/link";
 import { APP_PAGES } from "@/config/pages-url.config";
 import { Info } from "lucide-react";
-
-const SERVICES = [
-  { id: 1, fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
-  { id: 2, fullName: "YouTube Music", shortName: "YT", backgroundColor: "#FF0000" },
-  { id: 3, fullName: "Starlink", shortName: "ST", backgroundColor: "#0033A0" },
-  { id: 4, fullName: "Netflix", shortName: "NE", backgroundColor: "#E50914" },
-  { id: 5, fullName: "Megogo", shortName: "ME", backgroundColor: "#000000" },
-  { id: 6, fullName: "GitHub Copilot", shortName: "GC", backgroundColor: "#6CC644" },
-  { id: 7, fullName: "ChatGPT", shortName: "CH", backgroundColor: "#00A67E" },
-  { id: 8, fullName: "GeForce Now", shortName: "GF", backgroundColor: "#76B900" },
-];
+import { useServices } from "@/hooks/useServices";
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -64,6 +54,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       isNotifying: initialData?.isNotifying || false,
     },
   });
+
+  const { data: services, isLoading } = useServices()
 
   const handleFormSubmit = (data: SubscriptionFormInputs) => {
     console.log("modal window submit data: ", data);
@@ -114,10 +106,11 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 <div className="relative">
                   <select
                     {...field}
+                    disabled={isLoading}
                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.serviceId ? "border-red-600 text-red-600" : ""}`}
                   >
                     <option value={0}>Select a service</option>
-                    {SERVICES.map((service) => (
+                    {services?.map((service) => (
                       <option key={service.id} value={service.id}>
                         {service.fullName}
                       </option>

@@ -1,9 +1,6 @@
-import { IBase } from "./root.types"
-
-export interface IServiceResponse extends IBase {
-  name: string
-  url: string
-  logo: string
+export interface IServiceResponse {
+  id: string
+  fullName: string
+  shortName: string
+  backgroundColor: string
 }
-
-export type TypeServiceFormState = Partial<Omit<IServiceResponse, "id">>
