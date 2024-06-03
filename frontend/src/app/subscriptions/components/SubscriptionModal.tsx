@@ -107,7 +107,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   <select
                     {...field}
                     disabled={isLoading}
-                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.serviceId ? "border-red-600 text-red-600" : ""}`}
+                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.serviceId ? "border-red-600 placeholder:text-red-600" : ""}`}
                   >
                     <option value="">Select a service</option>
                     {services?.map((service) => (
