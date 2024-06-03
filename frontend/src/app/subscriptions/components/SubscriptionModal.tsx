@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Subscription, SubscriptionFormInputs } from "@/types/subscription.types";
 import Link from "next/link";
 import { APP_PAGES } from "@/config/pages-url.config";
+import { Info } from "lucide-react";
 
 const SERVICES = [
   { id: 1, fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
@@ -92,6 +93,19 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       <Modal.Body>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div>
+          {!isAuth && (
+            <div className="mx-auto flex gap-5 flex-col mb-5 border-blue-500 border-solid border-2 items-center bg-blue-300 p-4 rounded-md">
+              <div className="flex flex-row gap-3">
+                <Info color="white"/>
+                <p className="text-white font-bold">You need to authorize</p>
+              </div>
+              <p className="text-center text-white">
+                If you want to have SMS notification before upcoming payment you need to <Link href={APP_PAGES.LOGIN} className="font-extrabold text-primary-600 hover:underline">Register</Link> or <Link href={APP_PAGES.LOGIN} className="font-extrabold text-primary-600 hover:underline">Login</Link> to your existing account
+              </p>
+              <Button as={Link} className="text-white bg-transparent border-white hover:bg-gray-100 hover:text-gray-500 ml-2 w-1/4" href={APP_PAGES.LOGIN}>Authorize</Button>
+            </div>
+          )}
+
             <label className={`block text-sm font-medium text-gray-700 ${errors.serviceId ? "text-red-600" : ""}`}>Service</label>
             <Controller
               name="serviceId"
@@ -186,14 +200,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             />
           </div>
 
-          {!isAuth && (
-            <div className="w-3/4 mx-auto flex gap-5 flex-col items-center">
-              <p className="text-center">
-                If you want to have SMS notification before upcoming payment you need to <Link href={APP_PAGES.LOGIN} className="font-medium text-primary-600 hover:underline">Register</Link> or <Link href={APP_PAGES.LOGIN} className="font-medium text-primary-600 hover:underline">Login</Link> to your existing account
-              </p>
-              <Button as={Link} className="text-gray-500 bg-transparent border-green-500 hover:bg-green-500 hover:text-white ml-2 w-2/4" href={APP_PAGES.LOGIN}>Authorize</Button>
-            </div>
-          )}
+
 
           <div className={`flex ${onDelete ? "justify-between" : "justify-end"}`}>
             {onDelete && (

@@ -5,7 +5,7 @@ import { axioxWithoutAuth } from "@/api/interceptors"
 import { removeTokenFromStorage, saveTokenStorage } from "./auth-token.service"
 
 export const authService = {
-  async logic(data: ILoginForm) {
+  async login(data: ILoginForm) {
     const response = await axioxWithoutAuth.post<IAuthResponse>(
       "/auth/login",
       data

@@ -1,18 +1,18 @@
 "use client"
 
 import { APP_PAGES } from '@/config/pages-url.config';
+import { authService } from '@/services/auth.service';
+import { LoginFormInputs } from '@/types/auth.types';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { Button } from 'flowbite-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as yup from 'yup';
-
-type LoginFormInputs = {
-  email: string;
-  password: string;
-};
 
 const schema = yup.object().shape({
   email: yup
@@ -26,7 +26,10 @@ const schema = yup.object().shape({
 });
 
 export default function Login() {
-  const { handleSubmit, control, formState: { errors } } = useForm({
+  const { push } = useRouter()
+  const queryClient = useQueryClient()
+
+  const { handleSubmit, control, formState: { errors }, reset, setError } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       email: '',
@@ -34,12 +37,37 @@ export default function Login() {
     },
   });
 
-  const onSubmit = (data: LoginFormInputs) => {
-    toast.success('Successfully login to your account!', {
-      position: 'top-right',
-      duration: 5000,
-    })
-    console.log("Login data: ", data);
+  const { mutate, isPending: isLoading } = useMutation({
+    mutationKey: ['login'],
+    mutationFn: async (data: LoginFormInputs) => authService.login(data),
+    onSuccess() {
+      toast.success('Successfully login to your account!', {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      reset()
+      push(APP_PAGES.SUBSCRIPTIONS)
+
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    },
+    onError(error: AxiosError) {
+      toast.error("Failed to login to your account!", {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      if (error?.response?.data) {
+        setError(error?.response?.data?.type, {
+          type: "manual",
+          message: error?.response?.data?.message,
+        });
+      }
+    },
+  })
+
+  const onSubmit: SubmitHandler<LoginFormInputs> = (data: LoginFormInputs) => {
+    mutate(data)
   };
 
   return (
@@ -53,7 +81,7 @@ export default function Login() {
             </h1>
             <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit(onSubmit)}>
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">Your email</label>
+                <label className={`block mb-2 text-sm font-medium text-gray-700 ${errors.email ? "text-red-600" : ""}`}>Your email</label>
                 <Controller
                   name="email"
                   control={control}
@@ -61,7 +89,7 @@ export default function Login() {
                     <input
                       {...field}
                       type="email"
-                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.email ? "border-red-600 text-red-600 placeholder:text-red-600" : ""}`}
                       placeholder="Enter your email"
                     />
                   )}
@@ -70,7 +98,7 @@ export default function Login() {
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">Your password</label>
+                <label className={`block mb-2 text-sm font-medium text-gray-700 ${errors.password ? "text-sm text-red-600" : ""}`}>Your password</label>
                 <Controller
                   name="password"
                   control={control}
@@ -78,7 +106,7 @@ export default function Login() {
                     <input
                       {...field}
                       type="password"
-                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.password ? "border-red-600 text-red-600 placeholder:text-red-600" : ""}`}
                       placeholder="Enter your password"
                     />
                   )}
@@ -86,7 +114,7 @@ export default function Login() {
                 {errors.password && <p className="text-sm text-red-600 mt-2">{errors.password.message}</p>}
               </div>
 
-              <Button type="submit" className="w-full">Login to your account</Button>
+              <Button type="submit" isProcessing={isLoading} className="w-full">Login to your account</Button>
 
               <p className="text-sm font-light text-gray-500">
                 Dont have an account?  <Link href={APP_PAGES.REGISTER} className="font-medium text-primary-600 hover:underline">Register here</Link>

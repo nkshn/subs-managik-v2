@@ -6,7 +6,7 @@ export class RegisterDto extends AuthDto {
 	@MinLength(2, {
 		message: "Name is too short, please provide a real one"
 	})
-	@MaxLength(50, {
+	@MaxLength(255, {
 		message: "Name is too long, please provide a real one"
 	})
 	name: string

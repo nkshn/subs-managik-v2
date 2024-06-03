@@ -43,8 +43,7 @@ export class UserService {
 		const totalRequestedSerices = userProfile.requestedSerices.length
 
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { password, subscriptions, requestedSerices, ...restUser } =
-			userProfile
+		const { password, subscriptions, requestedSerices, ...restUser } = userProfile
 
 		return {
 			user: restUser,

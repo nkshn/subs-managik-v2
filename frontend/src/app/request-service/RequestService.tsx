@@ -36,13 +36,13 @@ export default function RequestService() {
   const onSubmit = (data: RequestedServiceFormInput) => {
     console.log("Requested service data: ", data);
     toast.success('Successfully requested new service!', {
-      position: 'top-right',
-      duration: 5000,
+      position: 'bottom-center',
+      duration: 3000,
     })
     reset()
   };
 
-  const isAuth = false;
+  const isAuth = true;
 
   return (
     <section>

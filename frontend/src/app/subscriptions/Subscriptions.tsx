@@ -12,7 +12,7 @@ import {
 import { SubscriptionCard } from "./components/SubscriptionCard"
 import { SubscriptionModal } from "./components/SubscriptionModal"
 
-const SUBSCRIPTIONS: Subscription[] = [/*
+const SUBSCRIPTIONS: Subscription[] = [
   {
     id: 1,
     service: { id: 1, fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
@@ -37,7 +37,7 @@ const SUBSCRIPTIONS: Subscription[] = [/*
     isNotifying: false,
     nextPaymentAt: "2024-04-28T17:20:13.256Z"
   }
-*/]
+]
 
 export default function Subscriptions() {
   const [isModalOpen, setModalOpen] = useState<boolean>(false)

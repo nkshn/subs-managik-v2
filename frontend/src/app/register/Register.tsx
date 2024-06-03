@@ -1,12 +1,16 @@
 "use client"
 
 import { APP_PAGES } from '@/config/pages-url.config';
+import { authService } from '@/services/auth.service';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from 'flowbite-react';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { AxiosError } from 'axios';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as yup from 'yup';
 
@@ -41,11 +45,15 @@ const schema = yup.object().shape({
     .required("Password must be provided"),
   repeatPassword: yup
     .string()
+    .required("Confirm password must be provided")
     .oneOf([yup.ref('password')], 'Passwords must match'),
 });
 
 export default function Register() {
-  const { handleSubmit, control, formState: { errors } } = useForm({
+  const { push } = useRouter()
+  const queryClient = useQueryClient()
+
+  const { handleSubmit, control, formState: { errors }, reset, setError } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       name: '',
@@ -56,12 +64,37 @@ export default function Register() {
     },
   });
 
-  const onSubmit = (data: RegisterFormInputs) => {
-    toast.success('Successfully created new account!', {
-      position: 'top-right',
-      duration: 5000,
-    })
-    console.log("Registration data: ", data);
+  const { mutate, isPending: isLoading } = useMutation({
+    mutationKey: ['register'],
+    mutationFn: async (data: RegisterFormInputs) => authService.register(data),
+    onSuccess() {
+      toast.success('Successfully created new account!', {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      reset()
+      push(APP_PAGES.SUBSCRIPTIONS)
+
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    },
+    onError(error: AxiosError) {
+      toast.error("Failed to created new account!", {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      if (error?.response?.data) {
+        setError(error?.response?.data?.type, {
+          type: "manual",
+          message: error?.response?.data?.message,
+        });
+      }
+    },
+  })
+
+  const onSubmit: SubmitHandler<RegisterFormInputs> = (data: RegisterFormInputs) => {
+    mutate(data)
   };
 
   return (
@@ -75,7 +108,7 @@ export default function Register() {
             </h1>
             <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit(onSubmit)}>
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Your name</label>
+                <label className={`block mb-2 text-sm font-medium text-gray-700 dark:text-white ${errors.name ? "text-red-600" : ""}`}>Your name</label>
                 <Controller
                   name="name"
                   control={control}
@@ -85,18 +118,16 @@ export default function Register() {
                       type="text"
                       name="name"
                       maxLength={255}
-                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.name ? "border-red-600 text-red-600": ""}`}
                       placeholder="Enter your name"
                     />
-
-
                   )}
                 />
                 {errors.name && <p className="text-sm text-red-600 mt-2">{errors.name.message}</p>}
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">Your email</label>
+                <label className={`block mb-2 text-sm font-medium text-gray-700 ${errors.email ? "text-red-600" : ""}`}>Your email</label>
                 <Controller
                   name="email"
                   control={control}
@@ -104,7 +135,7 @@ export default function Register() {
                     <input
                       {...field}
                       type="email"
-                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.email ? "border-red-600 text-red-600": ""}`}
                       placeholder="Enter your email"
                     />
                   )}
@@ -113,7 +144,7 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">Your phone number</label>
+              <label className={`block mb-2 text-sm font-medium text-gray-700 ${errors.phone ? "text-red-600" : ""}`}>Your phone number</label>
                 <Controller
                   name="phone"
                   control={control}
@@ -121,7 +152,7 @@ export default function Register() {
                     <input
                       {...field}
                       type="text"
-                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.phone ? "border-red-600 text-red-600": ""}`}
                       placeholder="Enter your phone number"
                     />
                   )}
@@ -130,7 +161,7 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">Your password</label>
+                <label className={`block mb-2 text-sm font-medium text-gray-700 ${errors.password ? "text-red-600" : ""}`}>Your password</label>
                 <Controller
                   name="password"
                   control={control}
@@ -138,7 +169,7 @@ export default function Register() {
                     <input
                       {...field}
                       type="password"
-                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.password ? "border-red-600 text-red-600": ""}`}
                       placeholder="Enter your password"
                     />
                   )}
@@ -147,7 +178,7 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">Confirm password</label>
+              <label className={`block mb-2 text-sm font-medium text-gray-700 ${errors.repeatPassword ? "text-red-600" : ""}`}>Confirm password</label>
                 <Controller
                   name="repeatPassword"
                   control={control}
@@ -156,14 +187,14 @@ export default function Register() {
                       {...field}
                       type="password"
                       placeholder="Confirm password"
-                      className="bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.repeatPassword ? "border-red-600 text-red-600": ""}`}
                     />
                   )}
                 />
                 {errors.repeatPassword && <p className="text-sm text-red-600 mt-2">{errors.repeatPassword.message}</p>}
               </div>
 
-              <Button type="submit" className="w-full">Create an account</Button>
+              <Button type="submit" isProcessing={isLoading} className="w-full">Create an account</Button>
 
               <p className="text-sm font-light text-gray-500">
                 Already have an account?  <Link href={APP_PAGES.LOGIN} className="font-medium text-primary-600 hover:underline">Login here</Link>

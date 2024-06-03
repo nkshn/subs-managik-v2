@@ -11,7 +11,6 @@ class APP {
   REQUEST_YOUR_SERVICE = `${this.rootPath}request-service`
 
   SUBSCRIPTIONS = `${this.rootPath}subscriptions`
-  SERVICES = `${this.rootPath}services`
 }
 
 export const APP_PAGES = new APP()

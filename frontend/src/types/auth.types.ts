@@ -13,3 +13,8 @@ export interface IAuthResponse {
   accessToken: string
   user: IUser
 }
+
+export type LoginFormInputs = {
+  email: string;
+  password: string;
+};

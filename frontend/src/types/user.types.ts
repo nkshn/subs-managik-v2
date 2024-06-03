@@ -6,7 +6,6 @@ export interface IUser extends IBase {
   name?: string
   email: string
   phone?: string
-  logo?: string
 }
 
 export interface ISubscriptionsResponse extends IUser {
@@ -14,8 +13,25 @@ export interface ISubscriptionsResponse extends IUser {
   requestedSerices: IRequestService[]
 }
 
+export interface ProfileFormInputs {
+  name: string;
+  email: string;
+  phone: string;
+  password?: string;
+}
+
 export interface IProfifeResponse {
-  user: IUser
+  user: {
+    id: string,
+    name: string,
+    email: string,
+    phone: string,
+  },
+  stats: {
+    totalSubscriptions: number
+    totalRevenue: number
+    totalRequestedSerices: number
+  }
 }
 
 export type TypeUserFrom = Omit<IUser, "id"> & { password?: string }
