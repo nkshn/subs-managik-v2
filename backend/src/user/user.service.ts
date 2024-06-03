@@ -32,6 +32,14 @@ export class UserService {
 		})
 	}
 
+	getByPhone(phone: string) {
+		return this.prisma.user.findUnique({
+			where: {
+				phone
+			}
+		})
+	}
+
 	async getProfile(id: string) {
 		const userProfile = await this.getById(id)
 
@@ -59,6 +67,7 @@ export class UserService {
 		const user = {
 			name: dto.name,
 			email: dto.email,
+			phone: dto.phone,
 			password: await hash(dto.password)
 		}
 
@@ -83,7 +92,6 @@ export class UserService {
 				id: true,
 				name: true,
 				email: true,
-				logo: true,
 				phone: true
 			}
 		})

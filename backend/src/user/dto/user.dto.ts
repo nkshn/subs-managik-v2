@@ -19,11 +19,12 @@ export class CreateUserDto {
 	})
 	name?: string
 
-	@IsEmail()
+	@IsString()
+	@IsEmail({}, { message: "Please provide a valid email address" })
 	email: string
 
-	@MinLength(6, {
-		message: "Password is too short, at least 6 characters required"
+	@MinLength(8, {
+		message: "Password is too short, at least 8 characters required"
 	})
 	@IsString()
 	password: string
@@ -51,13 +52,13 @@ export class UpdateUserDto {
 	name?: string
 
 	@IsOptional()
-	@IsEmail()
+	@IsEmail({}, { message: "Please provide a valid email address" })
 	email?: string
 
 	@IsOptional()
 	@IsString()
-	@MinLength(6, {
-		message: "Password is too short, at least 6 characters required"
+	@MinLength(8, {
+		message: "Password is too short, at least 8 characters required"
 	})
 	password?: string
 

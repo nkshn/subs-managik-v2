@@ -15,9 +15,8 @@ model User {
 
   name     String
   email    String  @unique
-  password String
-  logo     String?
   phone    String? @unique
+  password String
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -72,9 +71,6 @@ model RequestedService {
 
   name String
   url  String
-
-  pending  Boolean @default(false)
-  accepted Boolean @default(false)
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")

@@ -34,10 +34,21 @@ export class AuthService {
 	}
 
 	async register(dto: RegisterDto) {
-		const foundUser = await this.userService.getByEmail(dto.email)
-		if (foundUser) throw new BadRequestException({
+		const foundUserByEmail = await this.userService.getByEmail(dto.email)
+		if (foundUserByEmail) throw new BadRequestException({
 			type: "email",
-			message: "User already exists"
+			message: "User with such email already exists"
+		})
+
+		const foundUserByPhone = await this.userService.getByPhone(dto.phone)
+		if (foundUserByPhone) throw new BadRequestException({
+			type: "phone",
+			message: "User with such phone already exists"
+		})
+
+		if (dto.password !== dto.repeatPassword) throw new BadRequestException({
+			type: "repeatPassword",
+			message: "Passwords must match"
 		})
 
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars

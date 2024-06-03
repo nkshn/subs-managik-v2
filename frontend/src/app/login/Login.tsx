@@ -51,12 +51,23 @@ export default function Login() {
 
       queryClient.invalidateQueries({ queryKey: ['profile'] })
     },
-    onError(error: AxiosError) {
+    onError(error: any) {
       toast.error("Failed to login to your account!", {
         position: 'bottom-center',
         duration: 3000,
       })
 
+      // check if errors from server
+      if(typeof error?.response?.data?.message === "object" && error?.response?.data?.message?.length > 0) {
+        error?.response?.data?.message.forEach((err: any) => {
+          setError(err?.type, {
+            type: "manual",
+            message: err?.message,
+          });
+        });
+      }
+
+      // check if error from yup frone-end validation
       if (error?.response?.data) {
         setError(error?.response?.data?.type, {
           type: "manual",

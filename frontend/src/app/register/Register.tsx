@@ -53,7 +53,7 @@ export default function Register() {
   const { push } = useRouter()
   const queryClient = useQueryClient()
 
-  const { handleSubmit, control, formState: { errors }, reset, setError } = useForm({
+  const { handleSubmit, control, formState: { errors }, reset, setError, clearErrors } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       name: '',
@@ -78,12 +78,25 @@ export default function Register() {
 
       queryClient.invalidateQueries({ queryKey: ['profile'] })
     },
-    onError(error: AxiosError) {
-      toast.error("Failed to created new account!", {
+    onError(error: any) {
+      clearErrors()
+
+      toast.error("Failed to create new account!", {
         position: 'bottom-center',
         duration: 3000,
       })
 
+      // check if errors from server
+      if(typeof error?.response?.data?.message === "object" && error?.response?.data?.message?.length > 0) {
+        error?.response?.data?.message.forEach((err: any) => {
+          setError(err?.type, {
+            type: "manual",
+            message: err?.message,
+          });
+        });
+      }
+
+      // check if error from yup front-end validation
       if (error?.response?.data) {
         setError(error?.response?.data?.type, {
           type: "manual",
