@@ -10,7 +10,7 @@ export interface ISubscriptionResponse extends IBase {
 
 // new types
 export type Service = {
-  id: number;
+  id: string;
   fullName: string;
   shortName: string;
   backgroundColor: string;
@@ -26,7 +26,7 @@ export type Subscription = {
 };
 
 export type SubscriptionFormInputs = {
-  serviceId: number;
+  serviceId: string;
   note?: string;
   price: number;
   isNotifying?: boolean;

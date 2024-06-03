@@ -18,7 +18,7 @@ interface SubscriptionModalProps {
 }
 
 const validationSchema = yup.object().shape({
-  serviceId: yup.number().required("Service is required, pick one from the list").min(1, "Service is required, pick one from the list"),
+  serviceId: yup.string().required("Service is required, pick one from the list"),
   note: yup.string().optional(),
   price: yup.number().required("Price is required").min(0.01, "Price must be greater than 0"),
   nextPaymentAt: yup.string().required("Date of next payments is required, choose one"),
@@ -40,14 +40,14 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   } = useForm<SubscriptionFormInputs>({
     resolver: yupResolver<SubscriptionFormInputs>(validationSchema),
     values: {
-      serviceId: initialData?.service?.id || 0,
+      serviceId: initialData?.service?.id || "",
       note: initialData?.note || "",
       price: initialData?.price || 0,
       nextPaymentAt: initialData?.nextPaymentAt ? initialData.nextPaymentAt.split("T")[0] : "",
       isNotifying: initialData?.isNotifying || false,
     },
     defaultValues: {
-      serviceId: initialData?.service?.id || 0,
+      serviceId: initialData?.service?.id || "",
       note: initialData?.note || "",
       price: initialData?.price || 0,
       nextPaymentAt: initialData?.nextPaymentAt ? initialData.nextPaymentAt.split("T")[0] : "",
@@ -109,7 +109,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     disabled={isLoading}
                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${errors.serviceId ? "border-red-600 text-red-600" : ""}`}
                   >
-                    <option value={0}>Select a service</option>
+                    <option value="">Select a service</option>
                     {services?.map((service) => (
                       <option key={service.id} value={service.id}>
                         {service.fullName}

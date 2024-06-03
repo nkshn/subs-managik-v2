@@ -15,7 +15,7 @@ import { SubscriptionModal } from "./components/SubscriptionModal"
 const SUBSCRIPTIONS: Subscription[] = [
   {
     id: 1,
-    service: { id: 1, fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
+    service: { id: "clwz6xhhh00067huquwk23w27", fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
     price: 2.22,
     note: "батьківський megogo",
     isNotifying: true,
@@ -23,7 +23,7 @@ const SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: 2,
-    service: { id: 6, fullName: "GitHub Copilot", shortName: "GC", backgroundColor: "#6CC644" },
+    service: { id: "clwz6xhhs00097huqz5ivtm07", fullName: "GitHub Copilot", shortName: "GC", backgroundColor: "#6CC644" },
     price: 9.99,
     note: "",
     isNotifying: false,
@@ -31,7 +31,7 @@ const SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: 3,
-    service: { id: 2, fullName: "YouTube Music", shortName: "YT", backgroundColor: "#FF0000" },
+    service: { id: "clwz6xhh600047huqlkiovmbw", fullName: "YouTube Music", shortName: "YT", backgroundColor: "#FF0000" },
     price: 19.99,
     note: "мій fr gfn",
     isNotifying: false,
