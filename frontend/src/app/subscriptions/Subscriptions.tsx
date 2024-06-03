@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "flowbite-react"
-import { CirclePlus, PlusIcon, RefreshCwIcon } from "lucide-react"
+import { CirclePlus, PlusIcon } from "lucide-react"
 import { useState } from "react"
 
 import {
@@ -19,23 +19,47 @@ const SUBSCRIPTIONS: Subscription[] = [
     price: 2.22,
     note: "батьківський megogo",
     isNotifying: true,
-    nextPaymentAt: "2024-04-15T17:20:13.256Z"
+    nextPaymentAt: "2024-06-06T17:20:13.256Z"
   },
   {
     id: 2,
+    service: { id: "clwz6xhhh00067huquwk23w27", fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
+    price: 2.22,
+    note: "батьківський megogo",
+    isNotifying: true,
+    nextPaymentAt: "2024-06-04T17:20:13.256Z"
+  },
+  {
+    id: 3,
+    service: { id: "clwz6xhhh00067huquwk23w27", fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
+    price: 2.22,
+    note: "батьківський megogo",
+    isNotifying: true,
+    nextPaymentAt: "2024-06-03T17:20:13.256Z"
+  },
+  {
+    id: 4,
+    service: { id: "clwz6xhhh00067huquwk23w27", fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
+    price: 2.22,
+    note: "батьківський megogo",
+    isNotifying: true,
+    nextPaymentAt: "2024-06-02T17:20:13.256Z"
+  },
+  {
+    id: 5,
     service: { id: "clwz6xhhs00097huqz5ivtm07", fullName: "GitHub Copilot", shortName: "GC", backgroundColor: "#6CC644" },
     price: 9.99,
     note: "",
     isNotifying: false,
-    nextPaymentAt: "2024-04-20T17:20:13.256Z"
+    nextPaymentAt: "2024-05-20T17:20:13.256Z"
   },
   {
-    id: 3,
+    id: 6,
     service: { id: "clwz6xhh600047huqlkiovmbw", fullName: "YouTube Music", shortName: "YT", backgroundColor: "#FF0000" },
     price: 19.99,
     note: "мій fr gfn",
     isNotifying: false,
-    nextPaymentAt: "2024-04-28T17:20:13.256Z"
+    nextPaymentAt: "2024-05-28T17:20:13.256Z"
   }
 ]
 
