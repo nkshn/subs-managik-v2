@@ -51,10 +51,9 @@ model Subscription {
 model Service {
   id String @id @default(cuid())
 
-  name  String
-  price Float
-  url   String
-  logo  String
+  fullName        String @default("") @map("full_name")
+  shortName       String @default("") @map("short_name")
+  backgroundColor String @default("") @map("background_color")
 
   subscriptions Subscription[]
 
