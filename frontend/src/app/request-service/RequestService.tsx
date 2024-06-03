@@ -1,16 +1,19 @@
+"use client"
+
+import Loader from '@/components/ui/Loader';
 import { APP_PAGES } from '@/config/pages-url.config';
+import { useProfile } from '@/hooks/useProfile';
+import { requestService } from '@/services/request-service.service';
+import { RequestedServiceFormInput } from '@/types/requested-service.types';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useMutation } from '@tanstack/react-query';
 import { Button } from 'flowbite-react';
 import Link from 'next/link';
-import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import React, { useMemo } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as yup from 'yup';
-
-type RequestedServiceFormInput = {
-  name: string;
-  url: string;
-};
 
 const schema = yup.object().shape({
   name: yup
@@ -25,7 +28,11 @@ const schema = yup.object().shape({
 });
 
 export default function RequestService() {
-  const { handleSubmit, control, formState: { errors }, reset } = useForm<RequestedServiceFormInput>({
+  const { push } = useRouter()
+
+  const { data, isLoading: isProfileLoading } = useProfile();
+
+  const { handleSubmit, control, formState: { errors }, clearErrors, setError } = useForm<RequestedServiceFormInput>({
     resolver: yupResolver(schema),
     defaultValues: {
       name: '',
@@ -33,21 +40,61 @@ export default function RequestService() {
     }
   });
 
-  const onSubmit = (data: RequestedServiceFormInput) => {
-    console.log("Requested service data: ", data);
-    toast.success('Successfully requested new service!', {
-      position: 'bottom-center',
-      duration: 3000,
-    })
-    reset()
+  const { mutate, isPending: isLoading } = useMutation({
+    mutationKey: ['requested-service'],
+    mutationFn: async (data: RequestedServiceFormInput) => requestService.createRequestSerice(data),
+    onSuccess() {
+      toast.success('Successfully requested your service!', {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      push(APP_PAGES.SUBSCRIPTIONS)
+    },
+    onError(error: any) {
+      clearErrors()
+
+      toast.error("Failed to request your service!", {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      // check if errors from server
+      if (typeof error?.response?.data?.message === "object" && error?.response?.data?.message?.length > 0) {
+        error?.response?.data?.message.forEach((err: any) => {
+          setError(err?.type, {
+            type: "manual",
+            message: err?.message,
+          });
+        });
+      }
+
+      // check if error from yup front-end validation
+      if (error?.response?.data) {
+        setError(error?.response?.data?.type, {
+          type: "manual",
+          message: error?.response?.data?.message,
+        });
+      }
+    },
+  })
+
+  const onSubmit: SubmitHandler<RequestedServiceFormInput> = (data: RequestedServiceFormInput) => {
+    mutate(data);
   };
 
-  const isAuth = true;
+  const isAuthorized = useMemo(() => (
+    Boolean(data && !isProfileLoading)
+  ), [data, isProfileLoading]);
+
+  if (isProfileLoading) {
+    return <Loader />
+  }
 
   return (
     <section>
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        {isAuth ? (
+        {isAuthorized ? (
           <div className="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-700 md:text-2xl">
@@ -89,7 +136,7 @@ export default function RequestService() {
                   {errors.url && <p className="text-sm text-red-600 mt-2">{errors.url.message}</p>}
                 </div>
 
-                <Button type="submit" className="w-full">Request Service</Button>
+                <Button type="submit" isProcessing={isLoading} className="w-full">Request Service</Button>
               </form>
             </div>
           </div>

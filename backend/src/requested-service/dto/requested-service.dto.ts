@@ -1,14 +1,10 @@
 import {
-	IsOptional,
 	IsString,
 	IsUrl,
 	MinLength
 } from "class-validator"
 
 export class CreateRequestedServiceDto {
-	// @IsString()
-	// userId: string
-
 	@IsString()
 	@MinLength(2, {
 		message: "Service name is too short, at least 2 characters required"
@@ -16,24 +12,6 @@ export class CreateRequestedServiceDto {
 	name: string
 
 	@IsString()
-	@IsUrl()
+	@IsUrl({}, { message: "Enter please valid URL of service" })
 	url: string
-}
-
-export class UpdateRequestedServiceDto {
-	@IsOptional()
-	@IsString()
-	userId?: string
-
-	@IsOptional()
-	@IsString()
-	@MinLength(2, {
-		message: "Service name is too short, at least 2 characters required"
-	})
-	name?: string
-
-	@IsOptional()
-	@IsString()
-	@IsUrl()
-	url?: string
 }
