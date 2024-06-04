@@ -9,13 +9,33 @@ import {
 export class SubscriptionService {
 	constructor(private prisma: PrismaService) {}
 
+	// reusable variable for select options
+	private selectOptions = {
+		id: true,
+		isNotifying: true,
+		price: true,
+		note: true,
+		nextPaymentAt: true,
+		createdAt: true,
+		service: {
+			select: {
+				id: true,
+				fullName: true,
+				shortName: true,
+				backgroundColor: true,
+			}
+		}
+	};
+
 	// create new subscription for user with service
 	async create(userId: string, dto: CreateSubscriptionDto) {
 		return this.prisma.subscription.create({
 			data: {
 				...dto,
+				nextPaymentAt: new Date(dto.nextPaymentAt),
 				userId: userId
-			}
+			},
+			select: this.selectOptions,
 		})
 	}
 
@@ -30,7 +50,11 @@ export class SubscriptionService {
 				userId,
 				id: subscriptionId
 			},
-			data: dto
+			data: {
+				...dto,
+				nextPaymentAt: new Date(dto.nextPaymentAt),
+			},
+			select: this.selectOptions,
 		})
 	}
 
@@ -49,27 +73,10 @@ export class SubscriptionService {
 		return this.prisma.subscription.findMany({
 			where: {
 				userId
-			}
-		})
-	}
-
-	// get specific subscription of user by service
-	async getByUserIdAndServiceId(userId: string, serviceId: string) {
-		return this.prisma.subscription.findFirst({
-			where: {
-				userId,
-				serviceId
-			}
-		})
-	}
-
-
-	// get specific subscription of user by id
-	async getOneByUserId(subscriptionId: string, userId: string) {
-		return this.prisma.subscription.findFirst({
-			where: {
-				id: subscriptionId,
-				userId
+			},
+			select: this.selectOptions,
+			orderBy: {
+				createdAt: 'desc'
 			}
 		})
 	}

@@ -28,24 +28,6 @@ export class SubscriptionController {
 		return this.subscriptionService.getAllByUserId(userId)
 	}
 
-	@Get(":id")
-	@Auth()
-	async getOneByUserId(
-		@Param("id") subscriptionId: string,
-		@CurrentUser("id") userId: string
-	) {
-		return this.subscriptionService.getOneByUserId(subscriptionId, userId)
-	}
-
-	@Get()
-	@Auth()
-	async getByUserIdAndServiceId(
-		@CurrentUser("id") userId: string,
-		@Body() serviceId: string
-	) {
-		return this.subscriptionService.getByUserIdAndServiceId(userId, serviceId)
-	}
-
 	@UsePipes(new ValidationPipe())
 	@HttpCode(200)
 	@Post()

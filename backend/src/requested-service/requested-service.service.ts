@@ -1,35 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { CreateRequestedServiceDto, UpdateRequestedServiceDto } from './dto/requested-service.dto';
+import { CreateRequestedServiceDto } from './dto/requested-service.dto';
+import { TelegramService } from 'src/telegram/telegram.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class RequestedServiceService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private userService: UserService,
+    private telegramService: TelegramService,
+  ) {}
 
   async create(userId: string, dto: CreateRequestedServiceDto) {
-    return this.prisma.requestedService.create({
+    const requestedService = await this.prisma.requestedService.create({
       data: {
         ...dto,
         userId: userId,
       },
     })
-  }
 
-  async update(requestedServiceId: string, dto: UpdateRequestedServiceDto) {
-    return this.prisma.requestedService.update({
-      where: { id: requestedServiceId },
-      data: dto,
-    })
-  }
+    const user = await this.userService.getById(userId)
 
-  async delete(requestedServiceId: string) {
-    return this.prisma.requestedService.delete({
-      where: { id: requestedServiceId },
-    })
-  }
+    await this.telegramService.sendRequesterServiceNotifyMessage(requestedService, user)
 
-  async getAll() {
-    return this.prisma.requestedService.findMany()
+    return requestedService
   }
 
   async getAllByUserId(userId: string) {
@@ -37,12 +32,6 @@ export class RequestedServiceService {
       where: {
         userId,
       },
-    })
-  }
-
-  async getOneById(requestedServiceId: string) {
-    return this.prisma.requestedService.findFirst({
-      where: { id: requestedServiceId },
     })
   }
 }

@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, Min, Max } from "class-validator"
+import { IsOptional, IsString, IsNumber, Min, Max, IsBoolean } from "class-validator"
 
 export class CreateSubscriptionDto {
 	@IsString()
@@ -12,6 +12,12 @@ export class CreateSubscriptionDto {
 	@IsOptional()
 	@IsString()
 	note?: string = ""
+
+	@IsBoolean()
+	isNotifying: boolean = false
+
+	@IsString()
+	nextPaymentAt: string
 }
 
 export class UpdateSubscriptionDto {
@@ -28,4 +34,12 @@ export class UpdateSubscriptionDto {
 	@IsOptional()
 	@IsString()
 	note?: string
+
+	@IsOptional()
+	@IsBoolean()
+	isNotifying: boolean = false
+
+	@IsOptional()
+	@IsString()
+	nextPaymentAt: string
 }

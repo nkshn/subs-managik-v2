@@ -7,17 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// TODO: add leter maybe some ENUM
-// TODO: add later user preferences model
-
 model User {
   id String @id @default(cuid())
 
   name     String
   email    String  @unique
-  password String
-  logo     String?
   phone    String? @unique
+  password String
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -38,8 +34,10 @@ model Subscription {
   service   Service @relation(fields: [serviceId], references: [id])
   serviceId String  @map("service_id")
 
-  price Float
-  note  String?
+  price         Float
+  note          String?
+  isNotifying   Boolean  @map("is_notifying")
+  nextPaymentAt DateTime @map("next_payment_at")
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -51,10 +49,9 @@ model Subscription {
 model Service {
   id String @id @default(cuid())
 
-  name  String
-  price Float
-  url   String
-  logo  String
+  fullName        String @default("") @map("full_name")
+  shortName       String @default("") @map("short_name")
+  backgroundColor String @default("") @map("background_color")
 
   subscriptions Subscription[]
 
@@ -73,9 +70,6 @@ model RequestedService {
 
   name String
   url  String
-
-  pending  Boolean @default(false)
-  accepted Boolean @default(false)
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")

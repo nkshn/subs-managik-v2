@@ -5,10 +5,10 @@ import {
 	UnauthorizedException
 } from "@nestjs/common"
 import { JwtService } from "@nestjs/jwt"
-import { UserService } from "src/user/user.service"
-import { AuthDto } from "./dto/auth.dto"
 import { verify } from "argon2"
 import { Response } from "express"
+import { UserService } from "src/user/user.service"
+import { AuthDto } from "./dto/auth.dto"
 import { RegisterDto } from "./dto/register.dto"
 
 @Injectable()
@@ -19,7 +19,7 @@ export class AuthService {
 	constructor(
 		private jwt: JwtService,
 		private userService: UserService
-	) {}
+	) { }
 
 	async login(dto: AuthDto) {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -34,8 +34,22 @@ export class AuthService {
 	}
 
 	async register(dto: RegisterDto) {
-		const foundUser = await this.userService.getByEmail(dto.email)
-		if (foundUser) throw new BadRequestException("User already exists")
+		const foundUserByEmail = await this.userService.getByEmail(dto.email)
+		if (foundUserByEmail) throw new BadRequestException({
+			type: "email",
+			message: "User with such email already exists"
+		})
+
+		const foundUserByPhone = await this.userService.getByPhone(dto.phone)
+		if (foundUserByPhone) throw new BadRequestException({
+			type: "phone",
+			message: "User with such phone already exists"
+		})
+
+		if (dto.password !== dto.repeatPassword) throw new BadRequestException({
+			type: "repeatPassword",
+			message: "Passwords must match"
+		})
 
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { password, ...user } = await this.userService.create(dto)
@@ -104,11 +118,17 @@ export class AuthService {
 	private async validateUser(dto: AuthDto) {
 		const user = await this.userService.getByEmail(dto.email)
 
-		if (!user) throw new NotFoundException("User not found")
+		if (!user) throw new NotFoundException({
+			type: "email",
+			message: "User not found"
+		})
 
 		const isValid = await verify(user.password, dto.password)
 
-		if (!isValid) throw new UnauthorizedException("Invalid password")
+		if (!isValid) throw new UnauthorizedException({
+			type: "password",
+			message: "Invalid password",
+		})
 
 		return user
 	}

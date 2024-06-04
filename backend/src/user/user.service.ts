@@ -15,20 +15,8 @@ export class UserService {
 			},
 			include: {
 				subscriptions: {
-					select: {
-						id: true,
-						price: true,
-						note: true,
-						createdAt: true,
-						service: {
-							select: {
-								id: true,
-								name: true,
-								logo: true,
-								price: true,
-								url: true,
-							}
-						}
+					include: {
+						service: true,
 					}
 				},
 				requestedSerices: true,
@@ -44,6 +32,14 @@ export class UserService {
 		})
 	}
 
+	getByPhone(phone: string) {
+		return this.prisma.user.findUnique({
+			where: {
+				phone
+			}
+		})
+	}
+
 	async getProfile(id: string) {
 		const userProfile = await this.getById(id)
 
@@ -55,8 +51,7 @@ export class UserService {
 		const totalRequestedSerices = userProfile.requestedSerices.length
 
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { password, subscriptions, requestedSerices, ...restUser } =
-			userProfile
+		const { password, subscriptions, requestedSerices, ...restUser } = userProfile
 
 		return {
 			user: restUser,
@@ -72,6 +67,7 @@ export class UserService {
 		const user = {
 			name: dto.name,
 			email: dto.email,
+			phone: dto.phone,
 			password: await hash(dto.password)
 		}
 
@@ -96,7 +92,6 @@ export class UserService {
 				id: true,
 				name: true,
 				email: true,
-				logo: true,
 				phone: true
 			}
 		})
