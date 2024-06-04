@@ -1,16 +1,9 @@
-import { IRequestService } from "./requested-service.types"
 import { IBase } from "./root.types"
-import { ISubscriptionResponse } from "./subscription.types"
 
 export interface IUser extends IBase {
   name?: string
   email: string
   phone?: string
-}
-
-export interface ISubscriptionsResponse extends IUser {
-  subscriptions: ISubscriptionResponse[]
-  requestedSerices: IRequestService[]
 }
 
 export interface ProfileFormInputs {
@@ -33,5 +26,3 @@ export interface IProfifeResponse {
     totalRequestedSerices: number
   }
 }
-
-export type TypeUserFrom = Omit<IUser, "id"> & { password?: string }
