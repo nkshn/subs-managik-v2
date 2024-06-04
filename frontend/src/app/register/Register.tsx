@@ -6,7 +6,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from 'flowbite-react';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -87,7 +86,7 @@ export default function Register() {
       })
 
       // check if errors from server
-      if(typeof error?.response?.data?.message === "object" && error?.response?.data?.message?.length > 0) {
+      if (typeof error?.response?.data?.message === "object" && error?.response?.data?.message?.length > 0) {
         error?.response?.data?.message.forEach((err: any) => {
           setError(err?.type, {
             type: "manual",
@@ -131,7 +130,7 @@ export default function Register() {
                       type="text"
                       name="name"
                       maxLength={255}
-                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.name ? "border-red-600 text-red-600": ""}`}
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.name ? "border-red-600 text-red-600" : ""}`}
                       placeholder="Enter your name"
                     />
                   )}
@@ -148,7 +147,7 @@ export default function Register() {
                     <input
                       {...field}
                       type="email"
-                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.email ? "border-red-600 text-red-600": ""}`}
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.email ? "border-red-600 text-red-600" : ""}`}
                       placeholder="Enter your email"
                     />
                   )}
@@ -157,7 +156,7 @@ export default function Register() {
               </div>
 
               <div>
-              <label className={`block mb-2 text-sm font-medium text-gray-700 ${errors.phone ? "text-red-600" : ""}`}>Your phone number</label>
+                <label className={`block mb-2 text-sm font-medium text-gray-700 ${errors.phone ? "text-red-600" : ""}`}>Your phone number</label>
                 <Controller
                   name="phone"
                   control={control}
@@ -165,7 +164,7 @@ export default function Register() {
                     <input
                       {...field}
                       type="text"
-                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.phone ? "border-red-600 text-red-600": ""}`}
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.phone ? "border-red-600 text-red-600" : ""}`}
                       placeholder="Enter your phone number"
                     />
                   )}
@@ -182,7 +181,7 @@ export default function Register() {
                     <input
                       {...field}
                       type="password"
-                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.password ? "border-red-600 text-red-600": ""}`}
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.password ? "border-red-600 text-red-600" : ""}`}
                       placeholder="Enter your password"
                     />
                   )}
@@ -191,7 +190,7 @@ export default function Register() {
               </div>
 
               <div>
-              <label className={`block mb-2 text-sm font-medium text-gray-700 ${errors.repeatPassword ? "text-red-600" : ""}`}>Confirm password</label>
+                <label className={`block mb-2 text-sm font-medium text-gray-700 ${errors.repeatPassword ? "text-red-600" : ""}`}>Confirm password</label>
                 <Controller
                   name="repeatPassword"
                   control={control}
@@ -200,7 +199,7 @@ export default function Register() {
                       {...field}
                       type="password"
                       placeholder="Confirm password"
-                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.repeatPassword ? "border-red-600 text-red-600": ""}`}
+                      className={`bg-gray-50 border border-gray-300 text-gray-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${errors.repeatPassword ? "border-red-600 text-red-600" : ""}`}
                     />
                   )}
                 />

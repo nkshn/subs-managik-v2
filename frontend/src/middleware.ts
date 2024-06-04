@@ -1,6 +1,6 @@
+import { APP_PAGES } from '@/config/pages-url.config'
+import { EnumTokens } from '@/services/auth-token.service'
 import { NextRequest, NextResponse } from 'next/server'
-import { APP_PAGES } from './config/pages-url.config'
-import { EnumTokens } from './services/auth-token.service'
 
 export async function middleware(request: NextRequest, response: NextResponse) {
   const { url, cookies } = request

@@ -7,7 +7,7 @@ import Subscriptions from "./Subscriptions"
 
 export const metedata: Metadata = {
   title: `Subscriptions | ${SITE_NAME}`,
-  description: "Сторінка з усіма підписками користувачів"
+  description: "Here list of all your subscriptions"
 }
 
 export default function SubscriptionsPage() {

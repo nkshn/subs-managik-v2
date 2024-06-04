@@ -4,9 +4,9 @@ import { Toaster } from "sonner"
 
 import { SITE_NAME } from "@/constants/seo.constants"
 
+import { Navbar } from "@/components/navbar"
 import "./globals.scss"
 import { Providers } from "./providers"
-import { Navbar } from "@/components/navbar"
 
 const zen = Noto_Sans({
   subsets: ["latin", "cyrillic"],

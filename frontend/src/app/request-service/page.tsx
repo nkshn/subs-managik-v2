@@ -7,7 +7,7 @@ import RequestService from "./RequestService"
 
 export const metedata: Metadata = {
   title: `Request new service | ${SITE_NAME}`,
-  description: "Сторінка з усіма підписками користувачів"
+  description: "Here you can request a service which you didn't find in our list."
 }
 
 export default function RequestServicePage() {

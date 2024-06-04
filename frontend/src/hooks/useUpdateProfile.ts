@@ -1,6 +1,6 @@
-import { userService } from "@/services/user.service"
+import { userService } from "@/services/user.service";
 import { ProfileFormInputs } from "@/types/user.types";
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export function useUpdateProfile() {
@@ -10,17 +10,17 @@ export function useUpdateProfile() {
 		mutationKey: ['update-profile'],
 		mutationFn: (data: ProfileFormInputs) => userService.updateProfile(data),
 		onSuccess() {
-      toast.success('Successfully updated profile!', {
-        position: 'bottom-center',
-        duration: 3000,
-      })
+			toast.success('Successfully updated profile!', {
+				position: 'bottom-center',
+				duration: 3000,
+			})
 			queryClient.invalidateQueries({ queryKey: ['profile'] })
 		}
 	})
 
 	return {
-    mutate,
-    isLoading: isPending,
-    isSuccess,
-  }
+		mutate,
+		isLoading: isPending,
+		isSuccess,
+	}
 }

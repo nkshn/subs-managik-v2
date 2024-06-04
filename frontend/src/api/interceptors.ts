@@ -1,11 +1,11 @@
 import axios, { type CreateAxiosDefaults } from "axios"
 
-import { errorCatch } from "./error"
 import {
   getAccessToken,
   removeTokenFromStorage
 } from "@/services/auth-token.service"
 import { authService } from "@/services/auth.service"
+import { errorCatch } from "./error"
 
 const options: CreateAxiosDefaults = {
   baseURL: process.env.SERVER_URL,
@@ -54,4 +54,4 @@ axiosWithAuth.interceptors.response.use(
   }
 )
 
-export { axioxWithoutAuth, axiosWithAuth }
+export { axiosWithAuth, axioxWithoutAuth }

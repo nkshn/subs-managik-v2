@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
 import { userSubscriptionService } from '@/services/user-subscription.service'
+import { useQuery } from '@tanstack/react-query'
 
 export function useGetSubscriptions() {
 	const { data, isLoading, isSuccess } = useQuery({

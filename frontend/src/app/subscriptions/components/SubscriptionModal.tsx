@@ -15,7 +15,7 @@ import * as yup from "yup";
 
 interface SubscriptionModalProps {
   isOpen: boolean;
-  initialData: Subscription;
+  initialData: Subscription | null;
   onClose: () => void;
 }
 

@@ -5,7 +5,6 @@ import { authService } from '@/services/auth.service';
 import { LoginFormInputs } from '@/types/auth.types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
 import { Button } from 'flowbite-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -58,7 +57,7 @@ export default function Login() {
       })
 
       // check if errors from server
-      if(typeof error?.response?.data?.message === "object" && error?.response?.data?.message?.length > 0) {
+      if (typeof error?.response?.data?.message === "object" && error?.response?.data?.message?.length > 0) {
         error?.response?.data?.message.forEach((err: any) => {
           setError(err?.type, {
             type: "manual",
