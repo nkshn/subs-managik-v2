@@ -2,7 +2,7 @@
 
 import { Button } from "flowbite-react"
 import { CirclePlus, PlusIcon } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import {
   Subscription,
@@ -10,9 +10,12 @@ import {
 } from "@/types/subscription.types"
 
 import Loader from "@/components/ui/Loader"
+import { APP_PAGES } from "@/config/pages-url.config"
 import { useGetSubscriptions } from "@/hooks/useGetSubscriptions"
+import { useProfile } from "@/hooks/useProfile"
 import { userSubscriptionService } from "@/services/user-subscription.service"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import Link from "next/link"
 import { toast } from "sonner"
 import { SubscriptionCard } from "./components/SubscriptionCard"
 import { SubscriptionModal } from "./components/SubscriptionModal"
@@ -23,6 +26,7 @@ export default function Subscriptions() {
   const [isModalOpen, setModalOpen] = useState<boolean>(false)
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
 
+  const { data: user, isLoading: isUserLoading } = useProfile()
   const { data: subscriptions, isLoading: isSubscriptionsLoading } = useGetSubscriptions()
 
   const { mutateAsync: updateNotificationSubscription } = useMutation({
@@ -77,13 +81,31 @@ export default function Subscriptions() {
     })
   }
 
-  if (isSubscriptionsLoading) {
+  const isAuthorized = useMemo(() => (
+    Boolean(user && !isUserLoading)
+  ), [user, isUserLoading]);
+
+  if (isSubscriptionsLoading || isUserLoading) {
     return <Loader />
+  }
+
+  if (!isAuthorized && !isUserLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-dvh">
+        <h1 className="text-2xl font-bold mb-2">Unauthorized</h1>
+        <p className="text-gray-500 mb-6">You need to be logged in to view your subscriptions.</p>
+        <div className="flex space-x-4">
+          <Button as={Link} className="flex items-center px-4 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" href={APP_PAGES.LOGIN}>
+            Authorize
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
     <section className="bg-white w-3/4 mx-auto my-14">
-      {subscriptions.length !== 0 ? (
+      {subscriptions?.length !== 0 ? (
         <div className="w-auto mb-4">
           <Button
             onClick={handleAddNewSubscription}
@@ -96,7 +118,7 @@ export default function Subscriptions() {
       ) : null}
 
       <div className="flex flex-col gap-4">
-        {subscriptions.length === 0 ? (
+        {subscriptions?.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-dvh">
             <h1 className="text-2xl font-bold mb-2">No Subscriptions Yet</h1>
             <p className="text-gray-500 mb-6">You have not subscribed to anything yet.</p>

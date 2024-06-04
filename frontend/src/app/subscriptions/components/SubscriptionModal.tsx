@@ -1,14 +1,12 @@
 import { APP_PAGES } from "@/config/pages-url.config";
-import { useProfile } from "@/hooks/useProfile";
 import { useServices } from "@/hooks/useServices";
 import { userSubscriptionService } from "@/services/user-subscription.service";
 import { Subscription, SubscriptionFormInputs } from "@/types/subscription.types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Checkbox, Modal } from "flowbite-react";
-import { Info } from "lucide-react";
 import Link from "next/link";
-import React, { useMemo } from "react";
+import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as yup from "yup";
@@ -58,7 +56,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     },
   });
   const { data: services, isLoading } = useServices()
-  const { data: user, isLoading: isUserLoading } = useProfile()
 
   const { mutateAsync: createSubscription, isPending: isCreationLoading } = useMutation({
     mutationKey: ['create-subscription'],
@@ -185,29 +182,12 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     onClose();
   }
 
-  const isAuthorized = useMemo(() => (
-    Boolean(user && !isUserLoading)
-  ), [user, isUserLoading]);
-
   return (
     <Modal show={isOpen} onClose={closeAndClearForm}>
       <Modal.Header>{initialData ? "Edit Subscription" : "Add Subscription"}</Modal.Header>
       <Modal.Body>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div>
-            {!isAuthorized && (
-              <div className="mx-auto flex gap-5 flex-col mb-5 border-blue-500 border-solid border-2 items-center bg-blue-300 p-4 rounded-md">
-                <div className="flex flex-row gap-3">
-                  <Info color="white" />
-                  <p className="text-white font-bold">You need to authorize</p>
-                </div>
-                <p className="text-center text-white">
-                  If you want to have SMS notification before upcoming payment you need to <Link href={APP_PAGES.LOGIN} className="font-extrabold text-primary-600 hover:underline">Register</Link> or <Link href={APP_PAGES.LOGIN} className="font-extrabold text-primary-600 hover:underline">Login</Link> to your existing account
-                </p>
-                <Button as={Link} className="text-white bg-transparent border-white hover:bg-gray-100 hover:text-gray-500 ml-2 w-1/4" href={APP_PAGES.LOGIN}>Authorize</Button>
-              </div>
-            )}
-
             <label className={`block text-sm font-medium text-gray-700 ${errors.serviceId ? "text-red-600" : ""}`}>Service</label>
             <Controller
               name="serviceId"
@@ -289,17 +269,15 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             <Controller
               name="isNotifying"
               control={control}
-              disabled={!isAuthorized}
               render={({ field }) => (
                 <label className="flex items-center">
                   <Checkbox
                     className="form-checkbox h-5 w-5 text-indigo-600"
                     {...field}
                     checked={field.value}
-                    disabled={!isAuthorized}
                     value={field.value ? "true" : ""}
                   />
-                  <span className={`ml-2 text-sm ${isAuthorized ? "text-gray-600" : "text-gray-400"}`}>Notify about upcoming payments</span>
+                  <span className="ml-2 text-sm text-gray-400">Notify about upcoming payments</span>
                 </label>
               )}
             />
