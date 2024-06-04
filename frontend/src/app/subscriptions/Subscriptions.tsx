@@ -58,13 +58,13 @@ export default function Subscriptions() {
   }
 
   // edit subscription
-  const handleSubscriptiEdit = (subscription: Subscription): void => {
+  const handleSubscriptionEdit = (subscription: Subscription): void => {
     setEditingSubscription(subscription)
     setModalOpen(true)
   }
 
   // change notification of subscription
-  const handleSubscriptiNotify = (subscription: Subscription): void => {
+  const handleSubscriptionNotify = (subscription: Subscription): void => {
     updateNotificationSubscription({
       subscriptionId: subscription.id || "",
       data: {
@@ -115,8 +115,8 @@ export default function Subscriptions() {
             <SubscriptionCard
               key={subscription.id}
               subscription={subscription}
-              onEdit={handleSubscriptiEdit}
-              onNotify={handleSubscriptiNotify}
+              onEdit={handleSubscriptionEdit}
+              onNotify={handleSubscriptionNotify}
             />
           ))
         }

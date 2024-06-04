@@ -57,7 +57,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       isNotifying: initialData?.isNotifying || false,
     },
   });
-
   const { data: services, isLoading } = useServices()
   const { data: user, isLoading: isUserLoading } = useProfile()
 
@@ -73,6 +72,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       queryClient.refetchQueries({
         queryKey: ["subscriptions"],
       });
+
+      reset();
+      onClose();
     },
     onError: (error: any) => {
       toast.error("Failed to add new subscription!", {
@@ -165,11 +167,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   const handleFormSubmit: SubmitHandler<SubscriptionFormInputs> = async (data: SubscriptionFormInputs) => {
     if (initialData) {
-      console.log("we edit subscription, initialData: ", initialData);
       updateSubscription({ subscriptionId: initialData.id || "", data })
     } else {
       createSubscription(data)
-      console.log("we create new subscription");
     }
   };
 
@@ -295,7 +295,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   <Checkbox
                     className="form-checkbox h-5 w-5 text-indigo-600"
                     {...field}
+                    checked={field.value}
                     disabled={!isAuthorized}
+                    value={field.value ? "true" : ""}
                   />
                   <span className={`ml-2 text-sm ${isAuthorized ? "text-gray-600" : "text-gray-400"}`}>Notify about upcoming payments</span>
                 </label>
