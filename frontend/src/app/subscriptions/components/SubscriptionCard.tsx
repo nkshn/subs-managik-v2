@@ -1,7 +1,7 @@
 "use client"
 
 import { Subscription } from "@/types/subscription.types";
-import { addMonths, differenceInCalendarDays, format, isBefore, isToday, parseISO, setMonth } from 'date-fns';
+import { addMonths, differenceInCalendarDays, format, isBefore, isToday, parseISO, setMonth, setYear } from 'date-fns';
 import { Bell, BellOff, Pencil } from 'lucide-react';
 import { useCallback, useEffect, useState } from "react";
 
@@ -15,7 +15,8 @@ function adjustNextPaymentDate(nextPaymentAt: string): Date {
   const now = new Date();
   let nextPaymentDate = parseISO(nextPaymentAt);
 
-  // Set the next payment date to the current month
+  // Set the next payment date to the current year and month
+  nextPaymentDate = setYear(nextPaymentDate, now.getFullYear());
   nextPaymentDate = setMonth(nextPaymentDate, now.getMonth());
 
   // If the adjusted next payment date is before the current date, move it to the next month
