@@ -7,9 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// TODO: add leter maybe some ENUM
-// TODO: add later user preferences model
-
 model User {
   id String @id @default(cuid())
 
@@ -37,8 +34,10 @@ model Subscription {
   service   Service @relation(fields: [serviceId], references: [id])
   serviceId String  @map("service_id")
 
-  price Float
-  note  String?
+  price         Float
+  note          String?
+  isNotifying   Boolean  @map("is_notifying")
+  nextPaymentAt DateTime @map("next_payment_at")
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")

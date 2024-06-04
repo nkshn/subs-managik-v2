@@ -9,63 +9,42 @@ import {
   SubscriptionFormInputs
 } from "@/types/subscription.types"
 
+import Loader from "@/components/ui/Loader"
+import { useGetSubscriptions } from "@/hooks/useGetSubscriptions"
+import { userSubscriptionService } from "@/services/user-subscription.service"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { SubscriptionCard } from "./components/SubscriptionCard"
 import { SubscriptionModal } from "./components/SubscriptionModal"
 
-const SUBSCRIPTIONS: Subscription[] = [
-  {
-    id: 1,
-    service: { id: "clwz6xhhh00067huquwk23w27", fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
-    price: 2.22,
-    note: "батьківський megogo",
-    isNotifying: true,
-    nextPaymentAt: "2024-06-06T17:20:13.256Z"
-  },
-  {
-    id: 2,
-    service: { id: "clwz6xhhh00067huquwk23w27", fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
-    price: 2.22,
-    note: "батьківський megogo",
-    isNotifying: true,
-    nextPaymentAt: "2024-06-04T17:20:13.256Z"
-  },
-  {
-    id: 3,
-    service: { id: "clwz6xhhh00067huquwk23w27", fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
-    price: 2.22,
-    note: "батьківський megogo",
-    isNotifying: true,
-    nextPaymentAt: "2024-06-03T17:20:13.256Z"
-  },
-  {
-    id: 4,
-    service: { id: "clwz6xhhh00067huquwk23w27", fullName: "Spotify", shortName: "SP", backgroundColor: "#1DB954" },
-    price: 2.22,
-    note: "батьківський megogo",
-    isNotifying: true,
-    nextPaymentAt: "2024-06-02T17:20:13.256Z"
-  },
-  {
-    id: 5,
-    service: { id: "clwz6xhhs00097huqz5ivtm07", fullName: "GitHub Copilot", shortName: "GC", backgroundColor: "#6CC644" },
-    price: 9.99,
-    note: "",
-    isNotifying: false,
-    nextPaymentAt: "2024-05-20T17:20:13.256Z"
-  },
-  {
-    id: 6,
-    service: { id: "clwz6xhh600047huqlkiovmbw", fullName: "YouTube Music", shortName: "YT", backgroundColor: "#FF0000" },
-    price: 19.99,
-    note: "мій fr gfn",
-    isNotifying: false,
-    nextPaymentAt: "2024-05-28T17:20:13.256Z"
-  }
-]
-
 export default function Subscriptions() {
+  const queryClient = useQueryClient()
+
   const [isModalOpen, setModalOpen] = useState<boolean>(false)
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
+
+  const { data: subscriptions, isLoading: isSubscriptionsLoading } = useGetSubscriptions()
+
+  const { mutateAsync: updateNotificationSubscription } = useMutation({
+    mutationKey: ['update-subscription-notification'],
+    mutationFn: async ({ subscriptionId, data }: { subscriptionId: string, data: SubscriptionFormInputs }) => userSubscriptionService.updateSubscription(subscriptionId || '', data),
+    onSuccess() {
+      toast.success('Successfully updated your subscription!', {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      queryClient.refetchQueries({
+        queryKey: ["subscriptions"],
+      });
+    },
+    onError: () => {
+      toast.error("Failed to updated you subscription!", {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+    },
+  })
 
   // open modal window to add new subscription
   const handleAddNewSubscription = (): void => {
@@ -80,30 +59,31 @@ export default function Subscriptions() {
 
   // edit subscription
   const handleSubscriptiEdit = (subscription: Subscription): void => {
-    console.log("edit subscription", subscription)
-
     setEditingSubscription(subscription)
     setModalOpen(true)
   }
 
   // change notification of subscription
   const handleSubscriptiNotify = (subscription: Subscription): void => {
-    console.log("change notification of", subscription)
+    updateNotificationSubscription({
+      subscriptionId: subscription.id || "",
+      data: {
+        serviceId: subscription.service.id,
+        note: subscription.note,
+        price: subscription.price,
+        isNotifying: !subscription.isNotifying || false,
+        nextPaymentAt: subscription.nextPaymentAt,
+      }
+    })
   }
 
-  // save new subscription
-  const handleSaveSubscription = (data: SubscriptionFormInputs): void => {
-    console.log("save subscription", data)
-  }
-
-  // delete subscription
-  const handleDeleteSubscription = (data: Subscription): void => {
-    console.log("delete subscription", data)
+  if (isSubscriptionsLoading) {
+    return <Loader />
   }
 
   return (
     <section className="bg-white w-3/4 mx-auto my-14">
-      {SUBSCRIPTIONS.length !== 0 ? (
+      {subscriptions.length !== 0 ? (
         <div className="w-auto mb-4">
           <Button
             onClick={handleAddNewSubscription}
@@ -116,7 +96,7 @@ export default function Subscriptions() {
       ) : null}
 
       <div className="flex flex-col gap-4">
-        {SUBSCRIPTIONS.length === 0 ? (
+        {subscriptions.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-dvh">
             <h1 className="text-2xl font-bold mb-2">No Subscriptions Yet</h1>
             <p className="text-gray-500 mb-6">You have not subscribed to anything yet.</p>
@@ -131,7 +111,7 @@ export default function Subscriptions() {
             </div>
           </div>
         ) :
-          SUBSCRIPTIONS.map((subscription: Subscription) => (
+          subscriptions.map((subscription: Subscription) => (
             <SubscriptionCard
               key={subscription.id}
               subscription={subscription}
@@ -146,8 +126,6 @@ export default function Subscriptions() {
         isOpen={isModalOpen}
         initialData={editingSubscription || null}
         onClose={handleCloseModal}
-        onAddOrEditSubmit={handleSaveSubscription}
-        onDelete={editingSubscription ? handleDeleteSubscription : null}
       />
     </section>
   )

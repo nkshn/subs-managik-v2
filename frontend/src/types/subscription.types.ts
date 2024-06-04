@@ -17,7 +17,7 @@ export type Service = {
 };
 
 export type Subscription = {
-  id?: number;
+  id?: string;
   service: Service;
   price: number;
   note?: string;

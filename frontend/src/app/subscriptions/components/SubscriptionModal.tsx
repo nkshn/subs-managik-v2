@@ -1,20 +1,22 @@
-import React from "react";
-import { useForm, Controller } from "react-hook-form";
-import { Modal, Button, Checkbox } from "flowbite-react";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Subscription, SubscriptionFormInputs } from "@/types/subscription.types";
-import Link from "next/link";
 import { APP_PAGES } from "@/config/pages-url.config";
-import { Info } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
 import { useServices } from "@/hooks/useServices";
+import { userSubscriptionService } from "@/services/user-subscription.service";
+import { Subscription, SubscriptionFormInputs } from "@/types/subscription.types";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button, Checkbox, Modal } from "flowbite-react";
+import { Info } from "lucide-react";
+import Link from "next/link";
+import React, { useMemo } from "react";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as yup from "yup";
 
 interface SubscriptionModalProps {
   isOpen: boolean;
   initialData: Subscription;
   onClose: () => void;
-  onAddOrEditSubmit: (data: SubscriptionFormInputs) => void;
-  onDelete?: (data: Subscription) => void | null;
 }
 
 const validationSchema = yup.object().shape({
@@ -29,24 +31,25 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   isOpen,
   initialData,
   onClose,
-  onAddOrEditSubmit,
-  onDelete,
 }) => {
+  const queryClient = useQueryClient()
+
   const {
     control,
     handleSubmit,
     formState: { errors },
     reset,
+    setError,
   } = useForm<SubscriptionFormInputs>({
     resolver: yupResolver<SubscriptionFormInputs>(validationSchema),
-    values: {
+    defaultValues: {
       serviceId: initialData?.service?.id || "",
       note: initialData?.note || "",
       price: initialData?.price || 0,
       nextPaymentAt: initialData?.nextPaymentAt ? initialData.nextPaymentAt.split("T")[0] : "",
       isNotifying: initialData?.isNotifying || false,
     },
-    defaultValues: {
+    values: {
       serviceId: initialData?.service?.id || "",
       note: initialData?.note || "",
       price: initialData?.price || 0,
@@ -56,18 +59,123 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   });
 
   const { data: services, isLoading } = useServices()
+  const { data: user, isLoading: isUserLoading } = useProfile()
 
-  const handleFormSubmit = (data: SubscriptionFormInputs) => {
-    console.log("modal window submit data: ", data);
-    onAddOrEditSubmit(data);
-    reset();
-    onClose();
+  const { mutateAsync: createSubscription, isPending: isCreationLoading } = useMutation({
+    mutationKey: ['create-subscription'],
+    mutationFn: async (data: SubscriptionFormInputs) => userSubscriptionService.createNewSubscription(data),
+    onSuccess() {
+      toast.success('Successfully added new subscription!', {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      queryClient.refetchQueries({
+        queryKey: ["subscriptions"],
+      });
+    },
+    onError: (error: any) => {
+      toast.error("Failed to add new subscription!", {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      // check if errors from server
+      if (typeof error?.response?.data?.message === "object" && error?.response?.data?.message?.length > 0) {
+        error?.response?.data?.message.forEach((err: any) => {
+          setError(err?.type, {
+            type: "manual",
+            message: err?.message,
+          });
+        });
+      }
+
+      // check if error from yup frone-end validation
+      if (error?.response?.data) {
+        setError(error?.response?.data?.type, {
+          type: "manual",
+          message: error?.response?.data?.message,
+        });
+      }
+    },
+  })
+
+  const { mutateAsync: updateSubscription, isPending: isUpdatingLoading } = useMutation({
+    mutationKey: ['update-subscription'],
+    mutationFn: async ({ subscriptionId, data }: { subscriptionId: string, data: SubscriptionFormInputs }) => userSubscriptionService.updateSubscription(subscriptionId || '', data),
+    onSuccess() {
+      toast.success('Successfully updated your subscription!', {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      queryClient.refetchQueries({
+        queryKey: ["subscriptions"],
+      })
+
+      reset();
+      onClose();
+    },
+    onError: (error: any) => {
+      toast.error("Failed to updated you subscription!", {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      // check if errors from server
+      if (typeof error?.response?.data?.message === "object" && error?.response?.data?.message?.length > 0) {
+        error?.response?.data?.message.forEach((err: any) => {
+          setError(err?.type, {
+            type: "manual",
+            message: err?.message,
+          });
+        });
+      }
+
+      // check if error from yup frone-end validation
+      if (error?.response?.data) {
+        setError(error?.response?.data?.type, {
+          type: "manual",
+          message: error?.response?.data?.message,
+        });
+      }
+    },
+  })
+
+  const { mutateAsync: deleteSubscription, isPending: isDeletingLoading } = useMutation({
+    mutationKey: ['delete-subscription'],
+    mutationFn: async (subscriptionId: string) => userSubscriptionService.deleteSubscription(subscriptionId),
+    onSuccess() {
+      toast.success('Successfully deleted your subscription!', {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      queryClient.refetchQueries({
+        queryKey: ["subscriptions"],
+      });
+    },
+    onError: () => {
+      toast.error("Failed to delete you subscription!", {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+    },
+  })
+
+  const handleFormSubmit: SubmitHandler<SubscriptionFormInputs> = async (data: SubscriptionFormInputs) => {
+    if (initialData) {
+      console.log("we edit subscription, initialData: ", initialData);
+      updateSubscription({ subscriptionId: initialData.id || "", data })
+    } else {
+      createSubscription(data)
+      console.log("we create new subscription");
+    }
   };
 
   const handleDeleteSubscription = () => {
-    console.log("detete subscription, initialData", initialData);
-    if (onDelete) {
-      onDelete(initialData);
+    if (initialData) {
+      deleteSubscription(initialData.id || "")
       onClose();
     }
   }
@@ -77,7 +185,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     onClose();
   }
 
-  const isAuth = false
+  const isAuthorized = useMemo(() => (
+    Boolean(user && !isUserLoading)
+  ), [user, isUserLoading]);
 
   return (
     <Modal show={isOpen} onClose={closeAndClearForm}>
@@ -85,18 +195,18 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       <Modal.Body>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div>
-          {!isAuth && (
-            <div className="mx-auto flex gap-5 flex-col mb-5 border-blue-500 border-solid border-2 items-center bg-blue-300 p-4 rounded-md">
-              <div className="flex flex-row gap-3">
-                <Info color="white"/>
-                <p className="text-white font-bold">You need to authorize</p>
+            {!isAuthorized && (
+              <div className="mx-auto flex gap-5 flex-col mb-5 border-blue-500 border-solid border-2 items-center bg-blue-300 p-4 rounded-md">
+                <div className="flex flex-row gap-3">
+                  <Info color="white" />
+                  <p className="text-white font-bold">You need to authorize</p>
+                </div>
+                <p className="text-center text-white">
+                  If you want to have SMS notification before upcoming payment you need to <Link href={APP_PAGES.LOGIN} className="font-extrabold text-primary-600 hover:underline">Register</Link> or <Link href={APP_PAGES.LOGIN} className="font-extrabold text-primary-600 hover:underline">Login</Link> to your existing account
+                </p>
+                <Button as={Link} className="text-white bg-transparent border-white hover:bg-gray-100 hover:text-gray-500 ml-2 w-1/4" href={APP_PAGES.LOGIN}>Authorize</Button>
               </div>
-              <p className="text-center text-white">
-                If you want to have SMS notification before upcoming payment you need to <Link href={APP_PAGES.LOGIN} className="font-extrabold text-primary-600 hover:underline">Register</Link> or <Link href={APP_PAGES.LOGIN} className="font-extrabold text-primary-600 hover:underline">Login</Link> to your existing account
-              </p>
-              <Button as={Link} className="text-white bg-transparent border-white hover:bg-gray-100 hover:text-gray-500 ml-2 w-1/4" href={APP_PAGES.LOGIN}>Authorize</Button>
-            </div>
-          )}
+            )}
 
             <label className={`block text-sm font-medium text-gray-700 ${errors.serviceId ? "text-red-600" : ""}`}>Service</label>
             <Controller
@@ -179,31 +289,29 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             <Controller
               name="isNotifying"
               control={control}
-              disabled={!isAuth}
+              disabled={!isAuthorized}
               render={({ field }) => (
                 <label className="flex items-center">
                   <Checkbox
                     className="form-checkbox h-5 w-5 text-indigo-600"
                     {...field}
-                    disabled={!isAuth}
+                    disabled={!isAuthorized}
                   />
-                  <span className={`ml-2 text-sm ${isAuth ? "text-gray-600" : "text-gray-400"}`}>Notify about upcoming payments</span>
+                  <span className={`ml-2 text-sm ${isAuthorized ? "text-gray-600" : "text-gray-400"}`}>Notify about upcoming payments</span>
                 </label>
               )}
             />
           </div>
 
-
-
-          <div className={`flex ${onDelete ? "justify-between" : "justify-end"}`}>
-            {onDelete && (
-              <Button color="red" onClick={handleDeleteSubscription}>
+          <div className={`flex ${initialData ? "justify-between" : "justify-end"}`}>
+            {initialData && (
+              <Button color="red" isProcessing={isDeletingLoading} onClick={handleDeleteSubscription}>
                 Delete
               </Button>
             )}
             <div className="flex space-x-3">
               <Button color="gray" onClick={closeAndClearForm}>Cancel</Button>
-              <Button type="submit">Save</Button>
+              <Button type="submit" isProcessing={isCreationLoading || isUpdatingLoading}>Save</Button>
             </div>
           </div>
         </form>
