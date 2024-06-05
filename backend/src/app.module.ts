@@ -6,6 +6,7 @@ import { SubscriptionModule } from "./subscription/subscription.module"
 import { ServiceModule } from "./service/service.module"
 import { RequestedServiceModule } from './requested-service/requested-service.module';
 import { TelegramModule } from './telegram/telegram.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
 	imports: [
@@ -18,6 +19,7 @@ import { TelegramModule } from './telegram/telegram.module';
 		ServiceModule,
 		RequestedServiceModule,
 		TelegramModule,
+		NotificationsModule,
 	]
 })
 export class AppModule {}
