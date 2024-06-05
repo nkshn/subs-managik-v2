@@ -277,7 +277,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     checked={field.value}
                     value={field.value ? "true" : ""}
                   />
-                  <span className="ml-2 text-sm text-gray-400">Notify about upcoming payments</span>
+                  <span className="ml-2 text-sm text-gray-700">Notify me about upcoming payments for this subscription</span>
                 </label>
               )}
             />

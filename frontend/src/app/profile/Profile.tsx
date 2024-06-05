@@ -1,15 +1,19 @@
 "use client"
 
+import Loader from "@/components/ui/Loader";
 import { APP_PAGES } from "@/config/pages-url.config";
 import { useLogout } from "@/hooks/useLogout";
 import { useProfile } from "@/hooks/useProfile";
-import { useUpdateProfile } from "@/hooks/useUpdateProfile";
+import { userService } from "@/services/user.service";
 import { ProfileFormInputs } from "@/types/user.types";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "flowbite-react";
 import parsePhoneNumberFromString from "libphonenumber-js";
+import { RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as yup from 'yup';
 
 const validationSchema = yup.object().shape({
@@ -39,22 +43,60 @@ const validationSchema = yup.object().shape({
 });
 
 export default function Profile() {
+  const queryClient = useQueryClient()
   const router = useRouter()
 
-  const { data } = useProfile()
+  const { data: profile, isLoading: isProfileLoading } = useProfile()
 
   const { mutate: logoutMutation, isLoading: isLogoutLoading } = useLogout()
-  const { mutate: updateProfileMutation, isLoading: isUpdateProfileLoading } = useUpdateProfile()
 
-  const { control, handleSubmit, formState: { errors } } = useForm<ProfileFormInputs>({
+  const { control, handleSubmit, formState: { errors }, reset, clearErrors, setError } = useForm<ProfileFormInputs>({
     resolver: yupResolver(validationSchema),
     values: {
-      name: data?.user?.name || '',
-      email: data?.user?.email || '',
-      phone: data?.user?.phone || '',
+      name: profile?.user?.name || '',
+      email: profile?.user?.email || '',
+      phone: profile?.user?.phone || '',
       password: '',
     }
   });
+
+  const { mutate: updateProfileMutation, isPending: isUpdateProfileLoading } = useMutation({
+    mutationKey: ['update-profile'],
+    mutationFn: async (data: ProfileFormInputs) => userService.updateProfile(data),
+    onSuccess() {
+      toast.success('Successfully updated profile!', {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    },
+    onError(error: any) {
+      clearErrors()
+
+      toast.error("Failed to updated new account!", {
+        position: 'bottom-center',
+        duration: 3000,
+      })
+
+      // check if errors from server
+      if (typeof error?.response?.data?.message === "object" && error?.response?.data?.message?.length > 0) {
+        error?.response?.data?.message.forEach((err: any) => {
+          setError(err?.type, {
+            type: "manual",
+            message: err?.message,
+          });
+        });
+      }
+
+      // check if error from yup front-end validation
+      if (error?.response?.data) {
+        setError(error?.response?.data?.type, {
+          type: "manual",
+          message: error?.response?.data?.message,
+        });
+      }
+    },
+  })
 
   const onSubmit: SubmitHandler<ProfileFormInputs> = (data: ProfileFormInputs) => {
     const { password, ...rest } = data
@@ -65,10 +107,23 @@ export default function Profile() {
     })
   };
 
+  const restoreOldValues = () => {
+    reset({
+      name: profile?.user?.name || '',
+      email: profile?.user?.email || '',
+      phone: profile?.user?.phone || '',
+      password: '',
+    })
+  }
+
   const handleLogout = () => {
     logoutMutation()
 
     router.push(APP_PAGES.LOGIN)
+  }
+
+  if (isProfileLoading) {
+    return <Loader />
   }
 
   return (
@@ -79,15 +134,15 @@ export default function Profile() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="p-4 bg-white shadow rounded-lg">
             <h3 className="text-base font-semibold">Total Requested Services</h3>
-            <p className="mt-2 text-2xl">{data?.stats?.totalRequestedSerices || 0}</p>
+            <p className="mt-2 text-2xl">{profile?.stats?.totalRequestedSerices || 0}</p>
           </div>
           <div className="p-4 bg-white shadow rounded-lg">
             <h3 className="text-base font-semibold">Total Revenue</h3>
-            <p className="mt-2 text-2xl">{data?.stats?.totalRevenue || 0}</p>
+            <p className="mt-2 text-2xl">{profile?.stats?.totalRevenue || 0}$</p>
           </div>
           <div className="p-4 bg-white shadow rounded-lg">
             <h3 className="text-base font-semibold">Total Subscriptions</h3>
-            <p className="mt-2 text-2xl">{data?.stats?.totalSubscriptions || 0}</p>
+            <p className="mt-2 text-2xl">{profile?.stats?.totalSubscriptions || 0}</p>
           </div>
         </div>
       </div>
@@ -162,10 +217,18 @@ export default function Profile() {
           {errors.password && <p className="text-sm text-red-600 mt-2">{errors.password.message}</p>}
         </div>
 
-        <div className="flex justify-end gap-5">
-          <Button color="gray" outline isProcessing={isLogoutLoading} onClick={handleLogout} className="w-28">Logout</Button>
-          <Button type="submit" isProcessing={isUpdateProfileLoading} className="w-28">Save</Button>
+        <div className="flex flex-row justify-between">
+          <Button color="gray" outline onClick={restoreOldValues}>
+            <RotateCcw className="mr-2 h-5 w-5" />
+            Restore
+          </Button>
+
+          <div className="flex justify-end gap-3">
+            <Button color="red" isProcessing={isLogoutLoading} onClick={handleLogout} className="w-28">Logout</Button>
+            <Button type="submit" isProcessing={isUpdateProfileLoading} className="w-28">Save</Button>
+          </div>
         </div>
+
       </form>
     </div>
   )

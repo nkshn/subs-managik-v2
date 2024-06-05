@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common"
+import { BadRequestException, Injectable } from "@nestjs/common"
 import { hash } from "argon2"
 import { PrismaService } from "src/prisma.service"
 import { UpdateUserDto } from "./dto/user.dto"
@@ -21,6 +21,18 @@ export class UserService {
 				},
 				requestedSerices: true,
 			}
+		})
+	}
+
+	getAllWithSubscriptionsAndService() {
+		return this.prisma.user.findMany({
+			include: {
+        subscriptions: {
+					include: {
+						service: true,
+					}
+				}
+      },
 		})
 	}
 
@@ -79,8 +91,31 @@ export class UserService {
 	async update(id: string, dto: UpdateUserDto) {
 		let data = dto
 
+		const currentUser = await this.getById(id)
+
 		if (dto.password) {
 			data = { ...dto, password: await hash(dto.password) }
+		}
+
+		if (dto.email) {
+			if (currentUser.email !== dto.email) {
+				const foundUserByEmail = await this.getByEmail(dto.email)
+
+				if (foundUserByEmail) throw new BadRequestException({
+					type: "email",
+					message: "User with such email already exists",
+				})
+			}
+		}
+
+		if (dto.phone) {
+			if (currentUser.phone !== dto.phone) {
+				const foundUserByPhone = await this.getByPhone(dto.phone)
+				if (foundUserByPhone) throw new BadRequestException({
+					type: "phone",
+					message: "User with such phone already exists",
+				})
+			}
 		}
 
 		return this.prisma.user.update({
