@@ -5,7 +5,7 @@ import { Metadata } from "next"
 import { SITE_NAME } from "@/constants/seo.constants"
 import Subscriptions from "./Subscriptions"
 
-export const metedata: Metadata = {
+export const metadata: Metadata = {
   title: `Subscriptions | ${SITE_NAME}`,
   description: "Here list of all your subscriptions"
 }

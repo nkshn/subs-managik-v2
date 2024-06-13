@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 
-import { NO_INDEX_PAGE } from "@/constants/seo.constants"
+import { NO_INDEX_PAGE, SITE_NAME } from "@/constants/seo.constants"
 
-export const metedata: Metadata = {
-  title: "404 | Not Found",
+export const metadata: Metadata = {
+  title: `404 - Not Found | ${SITE_NAME}`,
   ...NO_INDEX_PAGE
 }
 
