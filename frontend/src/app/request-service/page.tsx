@@ -1,5 +1,3 @@
-"use client"
-
 import { Metadata } from "next"
 
 import { SITE_NAME } from "@/constants/seo.constants"
