@@ -88,7 +88,7 @@ export class AuthService {
 			httpOnly: true,
 			domain: this.configService.get<string>("DOMAIN_NAME"),
 			expires: expiresIn,
-			secure: false,
+			secure: true,
 			sameSite: this.configService.get<string>("NODE_ENV") === "production" ? "lax": "none"
 		})
 	}
@@ -98,7 +98,7 @@ export class AuthService {
 			httpOnly: true,
 			domain: this.configService.get<string>("DOMAIN_NAME"),
 			expires: new Date(0),
-			secure: false,
+			secure: true,
 			sameSite: this.configService.get<string>("NODE_ENV") === "production" ? "lax": "none"
 		})
 	}
