@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest, response: NextResponse) {
   const refreshToken = cookies.get(EnumTokens.REFRESH_TOKEN)?.value
   const isAuthPage = url.includes(APP_PAGES.LOGIN) || url.includes(APP_PAGES.REGISTER)
   const isProfilePage = url.includes(APP_PAGES.PROFILE)
-
+  console.log("Middleware", { url, refreshToken, isAuthPage, isProfilePage })
   // If user is on an auth page and has a refresh token, redirect to subscriptions
   if (isAuthPage && refreshToken) {
     return NextResponse.redirect(new URL(APP_PAGES.SUBSCRIPTIONS, url))
