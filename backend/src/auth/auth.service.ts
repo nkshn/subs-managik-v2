@@ -14,7 +14,7 @@ import { ConfigService } from "@nestjs/config"
 
 @Injectable()
 export class AuthService {
-	EXPIRE_DAY_REFRESH_TOKEN = 1
+	EXPIRE_DAY_REFRESH_TOKEN = 10
 	REFRESH_TOKEN_NAME = "refreshToken"
 
 	constructor(
@@ -88,7 +88,7 @@ export class AuthService {
 			httpOnly: true,
 			domain: this.configService.get<string>("DOMAIN_NAME"),
 			expires: expiresIn,
-			secure: true,
+			secure: false,
 			sameSite: this.configService.get<string>("NODE_ENV") === "production" ? "lax": "none"
 		})
 	}
@@ -98,7 +98,7 @@ export class AuthService {
 			httpOnly: true,
 			domain: this.configService.get<string>("DOMAIN_NAME"),
 			expires: new Date(0),
-			secure: true,
+			secure: false,
 			sameSite: this.configService.get<string>("NODE_ENV") === "production" ? "lax": "none"
 		})
 	}
