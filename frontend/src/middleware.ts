@@ -18,11 +18,10 @@ export async function middleware(request: NextRequest, response: NextResponse) {
     return NextResponse.next()
   }
 
-  if (!refreshToken && isProfilePage) {
-    return NextResponse.redirect(new URL(APP_PAGES.LOGIN, request.url))
-  }
-
   if (!refreshToken) {
+    if (isProfilePage) {
+      return NextResponse.redirect(new URL(APP_PAGES.LOGIN, request.url))
+    }
     return NextResponse.redirect(new URL(APP_PAGES.LOGIN, request.url))
   }
 
