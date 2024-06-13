@@ -10,6 +10,7 @@ import { Response } from "express"
 import { UserService } from "src/user/user.service"
 import { AuthDto } from "./dto/auth.dto"
 import { RegisterDto } from "./dto/register.dto"
+import { ConfigService } from "@nestjs/config"
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,8 @@ export class AuthService {
 
 	constructor(
 		private jwt: JwtService,
-		private userService: UserService
+		private userService: UserService,
+		private configService: ConfigService
 	) { }
 
 	async login(dto: AuthDto) {
@@ -84,20 +86,20 @@ export class AuthService {
 
 		res.cookie(this.REFRESH_TOKEN_NAME, refreshToken, {
 			httpOnly: true,
-			domain: "localhost", // TODO: later get from env, and change for production
+			domain: this.configService.get<string>("DOMAIN_NAME"),
 			expires: expiresIn,
 			secure: true,
-			sameSite: "none" // TODO: set to lax in production
+			sameSite: this.configService.get<string>("NODE_ENV") === "production" ? "lax": "none"
 		})
 	}
 
 	removeRefreshTokenFromResponse(res: Response) {
 		res.cookie(this.REFRESH_TOKEN_NAME, "", {
 			httpOnly: true,
-			domain: "localhost", // TODO: later get from env, and change for production
+			domain: this.configService.get<string>("DOMAIN_NAME"),
 			expires: new Date(0),
 			secure: true,
-			sameSite: "none" // TODO: set to lax in production
+			sameSite: this.configService.get<string>("NODE_ENV") === "production" ? "lax": "none"
 		})
 	}
 
